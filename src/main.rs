@@ -105,12 +105,12 @@ fn get_guess(hearts: u8) -> u8{
     loop{
         input.clear();
     println!("You currently have {}", "\u{2764} ".repeat(hearts.into()).green());
-    print!("What did you choose: ", "info");
+    print!("Make Your Choice: ", "info");
     io::stdin().read_line(&mut input).expect("Error Reading your input");
     match input.trim().parse::<u8>(){
         Ok(num) => return num,
         Err(err) => match err.kind(){
-            std::num::IntErrorKind::Empty => print!("Error: Input Is Empty.", "info"),
+            std::num::IntErrorKind::Empty => print!("Error: Input Is Empty.", "error"),
             std::num::IntErrorKind::InvalidDigit => print!("Error: Input is invalid.", "info"),
             std::num::IntErrorKind::PosOverflow => print!("Error: Overflow?\nLow expecting something with u8.", "info"),
             std::num::IntErrorKind::NegOverflow => print!("Error: No negatives here.", "info"),
@@ -153,14 +153,15 @@ fn main() {
     print_banner();
     let name = get_name();
     let mut player = Player::new(5 as u8, name.clone(), false);
-   print!("Hello This is a guess-game\nWorks 100% with your connection to the universe
-       and how lucky you are at guessing\nLet's see your skills", "info");    
+   print!("Hello {} This is a guess-game\nWorks 100% with your connection to the universe
+       and how lucky you are at guessing\nLet's see your skills", "info", name);    
     let mut sys_guess = rand_guess();
-   print!("Gotcha {}!\nWelcome to the guess Zone you have just 5 hearts at start:)\nEach failed attempt is minus one heart and each successful guess is plus 2 hearts:)\nYou can take a loan of 3 hearts from our hearts bank after been broke of heart\nWe will take back the hearts from your successful guesses and you get to take the loan just once\nif after the loan you make no successful guess, we will kick your ass out of the game:", "info", name);
+   print!("Gotcha!\nWelcome to the guess Zone you have just 5 hearts at start:)\nEach failed attempt is minus one heart and each successful guess is plus 2 hearts:)\nYou can take a loan of 3 hearts from our hearts bank after been broke of heart\nWe will take back the hearts from your successful guesses and you get to take the loan just once\nif after the loan you make no successful guess, we will kick your ass out of the game:", "info");
 
    print!("Press Enter to continue...", "info");
    let _=  get_input();
    clear_screen();
+   println!("Sys_gues: {}", sys_guess);
 
    loop {   
     let guess = get_guess(player.heart);
@@ -172,7 +173,7 @@ fn main() {
                Ordering::Equal => {
                    print!("That's correct...You just earned +2 hearts", "info");
                    player.add(2);
-                   if player.loan && player.heart >= 3{
+                   if player.loan && player.heart >= 4{
                     print!("hehe Time to payback your loan", "info");
                     player.pay();
                    }
@@ -185,16 +186,21 @@ fn main() {
                      },
                      Err(err) if err.trim().to_lowercase() == 'y'.to_string() => {
                         sys_guess = rand_guess();
+                        println!("sys_guess: {}", sys_guess);
+                        continue;
                      },
                      _ => {
                          print!("Bye", "info");
+                         break;
                      }
                    }
                },
            }
        }
-    if player.heart > 0 {
+    if player.heart > 1 {
+        println!("{} You just lost a {}","[!]".bright_red(), "\u{2764} ".repeat(1).red());
         player.sub(1);
+
     }
     else {
         print!("Consider borrowing as you are out of hearts", "error");
